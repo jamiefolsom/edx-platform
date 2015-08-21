@@ -81,9 +81,7 @@ def capture_call_stack(entity_name):
     temp_call_stack = [frame for frame in traceback.extract_stack()
                        if not any(reg.match(frame[0]) for reg in REGULAR_EXPS)]
 
-    final_call_stack = ""
-    for frame in traceback.format_list(temp_call_stack):
-        final_call_stack += frame
+    final_call_stack = "".join(traceback.format_list(temp_call_stack))
 
     def _should_get_logged(entity_name):
         """ checks if current call stack of current entity should be logged or not
