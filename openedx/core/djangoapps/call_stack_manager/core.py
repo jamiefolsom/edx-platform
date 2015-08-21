@@ -74,27 +74,12 @@ def capture_call_stack(entity_name):
 
     Arguments:
         entity_name - entity
-
     """
     # Holds temporary callstack
     # List with each element 4-tuple(filename, line number, function name, text)
     # and filtered with respect to regular expressions
     temp_call_stack = [frame for frame in traceback.extract_stack()
                        if not any(reg.match(frame[0]) for reg in REGULAR_EXPS)]
-
-    def _print(frame):
-        """ Converts the tuple format of frame to a printable format
-
-        Arguments:
-            frame - current frame tuple of format (file, line number, function name, context)
-
-        Returns:
-            frame converted to a string in following format
-            File XXX, line number XXX, in XXX
-                XXXXX
-        """
-        return str('\n File ' + str(frame[0]) + ', line number ' + str(frame[1]) + ', in ' +
-                   str(frame[2]) + '\n\t' + str(frame[3]))
 
     final_call_stack = ""
     for frame in traceback.format_list(temp_call_stack):
