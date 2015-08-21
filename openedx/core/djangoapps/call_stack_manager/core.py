@@ -61,12 +61,13 @@ REGULAR_EXPS = [re.compile(x) for x in ['^.*python2.7.*$', '^.*<exec_function>.*
 # List keeping track of entities not to be tracked
 HALT_TRACKING = []
 
-#  Dictionary which stores call logs
-# {'EntityName' : SetOf(ListOfFrames)}
-# Frames - ('FilePath','LineNumber','Context')
-#  {"<class 'courseware.models.StudentModule'>" : [[(file, line number, function name, context),(---,---,---)],
-#                                                 [(file, line number, function name, context),(---,---,---)]]}
 STACK_BOOK = collections.defaultdict(list)
+# Dictionary which stores call logs
+# {'EntityName' : ListOf<CallStacks>}
+# CallStacks is ListOf<Frame>
+# Frames is a tuple ('FilePath','LineNumber','Context')
+# {"<class 'courseware.models.StudentModule'>" : [[(file, line number, function name, context),(---,---,---)],
+#                                                 [(file, line number, function name, context),(---,---,---)]]}
 
 
 def capture_call_stack(entity_name):
@@ -84,7 +85,7 @@ def capture_call_stack(entity_name):
     final_call_stack = "".join(traceback.format_list(temp_call_stack))
 
     def _should_get_logged(entity_name):
-        """ checks if current call stack of current entity should be logged or not
+        """ Checks if current call stack of current entity should be logged or not.
 
         Arguments:
             entity_name - Name of the current entity
