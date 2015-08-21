@@ -79,7 +79,7 @@ def capture_call_stack(entity_name):
     # Holds temporary callstack
     # List with each element 4-tuple(filename, line number, function name, text)
     # and filtered with respect to regular expressions
-    temp_call_stack = [frame for frame in [frames for frames in traceback.extract_stack()]
+    temp_call_stack = [frame for frame in traceback.extract_stack()
                        if not any(reg.match(frame[0]) for reg in REGULAR_EXPS)]
 
     def _print(frame):
@@ -96,43 +96,45 @@ def capture_call_stack(entity_name):
         return str('\n File ' + str(frame[0]) + ', line number ' + str(frame[1]) + ', in ' +
                    str(frame[2]) + '\n\t' + str(frame[3]))
 
-    # Customize output of call stack
     final_call_stack = ""
-    for frame in temp_call_stack:
-        final_call_stack += _print(frame)
+    for frame in traceback.format_list(temp_call_stack):
+        final_call_stack += frame
 
     def _should_get_logged(entity_name):
         """ checks if current call stack of current entity should be logged or not
 
         Arguments:
             entity_name - Name of the current entity
-
+'  File "/edx/app/edxapp/edx-platform/common/djangoapps/util/views.py", line 40, in inner\n    response = view_func(request, *args, **kwargs)\n', '  File "/edx/app/edxapp/edx-platform/common/djangoapps/util/db.py", line 42, in wrapper\n    return func(*args, **kwargs)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/views.py", line 369, in index\n    return _index_bulk_op(request, course_key, chapter, section, position)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/views.py", line 421, in _index_bulk_op\n    course_key, user, course, depth=2)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/model_data.py", line 798, in cache_for_descriptor_descendents\n    cache.add_descriptor_descendents(descriptor, depth, descriptor_filter)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/model_data.py", line 781, in add_descriptor_descendents\n    self.add_descriptors_to_cache(descriptors)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/model_data.py", line 741, in add_descriptors_to_cache\n    self.cache[scope].cache_fields(fields, descriptors, self.asides)\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/model_data.py", line 373, in cache_fields\n    for user_state in block_field_state:\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/user_state_client.py", line 144, in get_many\n    for module, usage_key in modules:\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/user_state_client.py", line 97, in _get_student_modules\n    for student_module in query:\n', '  File "/edx/app/edxapp/edx-platform/lms/djangoapps/courseware/models.py", line 67, in <genexpr>\n    for chunk in chunks(items, chunk_size)\n']
         Returns:
             True if the current call stack is to logged, False otherwise
         """
         is_entity_in_stack_book = temp_call_stack in STACK_BOOK[entity_name]
 
-        if HALT_TRACKING:
-            if inspect.isclass(entity_name):
-                is_class_in_halt_tracking = issubclass(entity_name, tuple(HALT_TRACKING[-1]))
-            else:
-                is_function_in_halt_tracking = any((entity_name.__name__ == x.__name__ and
-                                                    entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1]))
+        if is_entity_in_stack_book:
+            return False
+        else:
+            if HALT_TRACKING:
+                if inspect.isclass(entity_name):
+                    is_class_in_halt_tracking = issubclass(entity_name, tuple(HALT_TRACKING[-1]))
+                else:
+                    is_function_in_halt_tracking = any((entity_name.__name__ == x.__name__ and
+                                                        entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1]))
 
-            is_top_none = (HALT_TRACKING[-1] is None)
+                is_top_none = (HALT_TRACKING[-1] is None)
 
-            if is_top_none:
-                return False
-            # if entity is class
-            elif inspect.isclass(entity_name) and not is_class_in_halt_tracking and not is_entity_in_stack_book:
-                return True
-            # if entity is function/method
-            elif not inspect.isclass(entity_name) and not is_function_in_halt_tracking and not is_entity_in_stack_book:
-                return True
+                if is_top_none:
+                    return False
+                # if entity is class
+                elif inspect.isclass(entity_name) and not is_class_in_halt_tracking:
+                    return True
+                # if entity is function/method
+                elif not inspect.isclass(entity_name) and not is_function_in_halt_tracking:
+                    return True
+                else:
+                    return False
             else:
-                False
-        else:  # if HALT_TRACKING is not NULL
-            return not is_entity_in_stack_book
+                return True
 
     if _should_get_logged(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
