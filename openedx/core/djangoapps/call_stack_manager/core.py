@@ -38,10 +38,7 @@ FOR DISABLING TRACKING-
 1. Import following at appropriate location-
     from openedx.core.djangoapps.call_stack_manager import donottrack
 NOTE - You need to import function/class you do not want to track.
-
-
 """
-
 
 import logging
 import traceback
@@ -130,28 +127,22 @@ def capture_call_stack(entity_name):
 
 
 class CallStackMixin(object):
-    """ Mixin class for getting call stacks when save() and delete() methods are called
-    """
-
+    """ Mixin class for getting call stacks when save() and delete() methods are called """
     def save(self, *args, **kwargs):
-        """ Logs before save() and overrides respective model API save()
-        """
+        """ Logs before save() and overrides respective model API save() """
         capture_call_stack(type(self))
         return super(CallStackMixin, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        """ Logs before delete() and overrides respective model API delete()
-        """
+        """ Logs before delete() and overrides respective model API delete() """
         capture_call_stack(type(self))
         return super(CallStackMixin, self).delete(*args, **kwargs)
 
 
 class CallStackManager(Manager):
-    """ Manager class which overrides the default Manager class for getting call stacks
-    """
+    """ Manager class which overrides the default Manager class for getting call stacks """
     def get_query_set(self):
-        """ Override the default queryset API method
-        """
+        """ Override the default queryset API method """
         capture_call_stack(self.model)
         return super(CallStackManager, self).get_query_set()
 

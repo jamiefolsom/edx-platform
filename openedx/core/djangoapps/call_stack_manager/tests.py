@@ -11,56 +11,48 @@ from openedx.core.djangoapps.call_stack_manager import core
 
 
 class ModelMixinCallStckMngr(CallStackMixin, models.Model):
-    """ Test Model class which uses both CallStackManager, and CallStackMixin
-    """
+    """ Test Model class which uses both CallStackManager, and CallStackMixin """
     # override Manager objects
     objects = CallStackManager()
     id_field = models.IntegerField()
 
 
 class ModelMixin(CallStackMixin, models.Model):
-    """ Test Model that uses CallStackMixin but does not use CallStackManager
-    """
+    """ Test Model class that uses CallStackMixin but does not use CallStackManager """
     id_field = models.IntegerField()
 
 
 class ModelNothingCallStckMngr(models.Model):
-    """ Test Model class that neither uses CallStackMixin nor CallStackManager
-    """
+    """ Test Model class that neither uses CallStackMixin nor CallStackManager """
     id_field = models.IntegerField()
 
 
 class ModelAnotherCallStckMngr(models.Model):
-    """ Test Model class that only uses overridden Manager CallStackManager
-    """
+    """ Test Model class that only uses overridden Manager CallStackManager """
     objects = CallStackManager()
     id_field = models.IntegerField()
 
 
 class ModelWithCallStackMngr(models.Model):
-    """ Parent class of ModelWithCallStckMngrChild
-    """
+    """ Parent class of ModelWithCallStckMngrChild """
     id_field = models.IntegerField()
 
 
 class ModelWithCallStckMngrChild(ModelWithCallStackMngr):
-    """ Child class of ModelWithCallStackMngr
-    """
+    """ Child class of ModelWithCallStackMngr """
     objects = CallStackManager()
     child_id_field = models.IntegerField()
 
 
 @donottrack(ModelWithCallStackMngr)
 def donottrack_subclass():
-    """ function in which subclass and superclass calls QuerySetAPI
-    """
+    """ function in which subclass and superclass calls QuerySetAPI """
     ModelWithCallStackMngr.objects.filter(id_field=1)
     ModelWithCallStckMngrChild.objects.filter(child_id_field=1)
 
 
 def track_without_donottrack():
-    """ Function calling QuerySetAPI, another function, again QuerySetAPI
-    """
+    """ Function calling QuerySetAPI, another function, again QuerySetAPI """
     ModelAnotherCallStckMngr.objects.filter(id_field=1)
     donottrack_child_func()
     ModelAnotherCallStckMngr.objects.filter(id_field=1)
@@ -68,8 +60,7 @@ def track_without_donottrack():
 
 @donottrack(ModelAnotherCallStckMngr)
 def donottrack_child_func():
-    """ decorated child function
-    """
+    """ decorated child function """
     # should not be tracked
     ModelAnotherCallStckMngr.objects.filter(id_field=1)
 
@@ -79,8 +70,7 @@ def donottrack_child_func():
 
 @donottrack(ModelMixinCallStckMngr)
 def donottrack_parent_func():
-    """ decorated parent function
-    """
+    """ decorated parent function """
     # should not  be tracked
     ModelMixinCallStckMngr.objects.filter(id_field=1)
     # should be tracked
@@ -90,8 +80,7 @@ def donottrack_parent_func():
 
 @donottrack()
 def donottrack_func_parent():
-    """ non-parameterized @donottrack decorated function calling child function
-    """
+    """ non-parameterized @donottrack decorated function calling child function """
     ModelMixin.objects.all()
     donottrack_func_child()
     ModelMixin.objects.filter(id_field=1)
@@ -99,33 +88,28 @@ def donottrack_func_parent():
 
 @donottrack()
 def donottrack_func_child():
-    """ child decorated non-parameterized function
-    """
+    """ child decorated non-parameterized function """
     # Should not be tracked
     ModelMixin.objects.all()
 
 
 @trackit
 def trackit_func():
-    """ Test function for track it function
-    """
+    """ Test function for track it function """
     return "hi"
 
 
 class ClassFortrackit(object):
-    """ Test class for track it
-    """
+    """ Test class for track it """
     @trackit
     def trackit_method(self):
-        """ Instance method for tetsing track it
-        """
+        """ Instance method for tetsing track it """
         return 42
 
     @trackit
     @classmethod
     def trackit_class_method(cls):
-        """ Classmethod for testing track it
-        """
+        """ Classmethod for testing track it """
         return 42
 
 
@@ -137,20 +121,16 @@ def donottrack_function():
 
 @donottrack()
 def donottrack_yield_func():
-    """ Function testing yield in donottrack
-    """
+    """ Function testing yield in donottrack """
     ModelMixinCallStckMngr(id_field=1).save()
     yield 48
 
 
 class ClassReturingValue(object):
-    """
-    Test class with a decorated method
-    """
+    """ Test class with a decorated method """
     @donottrack()
     def donottrack_check_with_return(self, argument=43):
-        """ function that returns something i.e. a wrapped function returning some value
-        """
+        """ Function that returns something i.e. a wrapped function returning some value """
         return 42 + argument
 
 
@@ -284,15 +264,13 @@ class TestingCallStackManager(TestCase):
         self.assertEqual(len(log_capt.call_args_list), 0)
 
     def test_trackit_func(self, log_capt):
-        """ Test track it for function
-        """
+        """ Test track it for function """
         var = trackit_func()
         self.assertEqual("hi", var)
         self.assertEqual(len(log_capt.call_args_list), 1)
 
     def test_trackit_instance_method(self, log_capt):
-        """ Test track it for instance method
-        """
+        """ Test track it for instance method """
         cls = ClassFortrackit()
         var = cls.trackit_method()
         self.assertEqual(42, var)
@@ -303,8 +281,7 @@ class TestingCallStackManager(TestCase):
         self.assertEqual(ClassFortrackit.trackit_method.__module__, logged_function_module)
 
     def test_trackit_class_method(self, log_capt):
-        """ Test for class method
-        """
+        """ Test for class method """
         var = ClassFortrackit.trackit_class_method()
         self.assertEqual(42, var)
         logged_function_module = log_capt.call_args_list[0][0][2]
@@ -314,13 +291,11 @@ class TestingCallStackManager(TestCase):
         self.assertEqual(ClassFortrackit.trackit_class_method.__module__, logged_function_module)
 
     def test_yield(self, log_capt):
-        """ Test for yeild generator
-        """
+        """ Test for yield generator """
         donottrack_yield_func()
         self.assertEqual(len(log_capt.call_args_list), 0)
 
     def test_donottrack_function(self, log_capt):
-        """ Test donotrack for functions
-        """
+        """ Test donotrack for functions """
         donottrack_function()
         self.assertEqual(len(log_capt.call_args_list), 0)
