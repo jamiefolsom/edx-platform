@@ -37,7 +37,7 @@ NOTE - @trackit is non-parameterized decorator.
 FOR DISABLING TRACKING-
 1. Import following at appropriate location-
     from openedx.core.djangoapps.call_stack_manager import donottrack
-NOTE - You need to import function/class you do not want to track in.
+NOTE - You need to import function/class you do not want to track.
 
 
 """
@@ -64,8 +64,8 @@ HALT_TRACKING = []
 #  Dictionary which stores call logs
 # {'EntityName' : SetOf(ListOfFrames)}
 # Frames - ('FilePath','LineNumber','Context')
-#  {"<class 'courseware.models.StudentModule'>" : ([(file, line number, function name, context),(---,---,---)],
-#                                                 [(file, line number, function name, context),(---,---,---)])}
+#  {"<class 'courseware.models.StudentModule'>" : [[(file, line number, function name, context),(---,---,---)],
+#                                                 [(file, line number, function name, context),(---,---,---)]]}
 STACK_BOOK = collections.defaultdict(list)
 
 
@@ -117,7 +117,7 @@ def capture_call_stack(entity_name):
                 is_class_in_halt_tracking = issubclass(entity_name, tuple(HALT_TRACKING[-1]))
             else:
                 is_function_in_halt_tracking = any((entity_name.__name__ == x.__name__ and
-                                            entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1]))
+                                                    entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1]))
 
             is_top_none = (HALT_TRACKING[-1] is None)
 
@@ -138,7 +138,7 @@ def capture_call_stack(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
         if inspect.isclass(entity_name):
             log.info("Logging new call stack number %s for %s:\n %s", len(STACK_BOOK[entity_name]),
-                 entity_name, final_call_stack)
+                     entity_name, final_call_stack)
         else:
             log.info("Logging new call stack number %s for %s.%s:\n %s", len(STACK_BOOK[entity_name]),
                      entity_name.__module__, entity_name.__name__ , final_call_stack)
@@ -184,11 +184,11 @@ def donottrack(*entities_not_to_be_tracked):
         entities_not_to_be_tracked = [None]
 
     @wrapt.decorator
-    def real_donottrack(wrapped, instance, args, kwargs):
+    def real_donottrack(wrapped, instance, args, kwargs):  # pylint: disable=unused-variable
         """ Takes function to be decorated and returns wrapped function
 
         Arguments:
-            wrapped - The wrapped function which in turns needs to be called by wrapper function.
+            wrapped - The wrapped function which in turns needs to be called by wrapper function
             instance - The object to which the wrapped function was bound when it was called.
             args - The list of positional arguments supplied when the decorated function was called.
             kwargs - The dictionary of keyword arguments supplied when the decorated function was called.
@@ -219,7 +219,7 @@ def donottrack(*entities_not_to_be_tracked):
 
 
 @wrapt.decorator
-def trackit(wrapped, instance, args, kwargs):
+def trackit(wrapped, instance, args, kwargs):  # pylint: disable=unused-variable
     """ Decorator which tracks logs call stacks
 
     Arguments:
@@ -233,5 +233,3 @@ def trackit(wrapped, instance, args, kwargs):
     """
     capture_call_stack(wrapped)
     return wrapped(*args, **kwargs)
-
-
