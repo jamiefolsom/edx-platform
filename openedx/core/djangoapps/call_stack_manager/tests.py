@@ -294,7 +294,7 @@ class TestingCallStackManager(TestCase):
     def test_yield(self, log_capt):
         """ Test for yield generator """
         donottrack_yield_func()
-        self.assertEqual(core.HALT_TRACKING[-1], [None])
+        self.assertEqual(core.HALT_TRACKING[-1], None)
         self.assertEqual(len(log_capt.call_args_list), 0)
 
     def test_donottrack_function(self, log_capt):
