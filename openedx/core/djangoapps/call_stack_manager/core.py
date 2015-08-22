@@ -89,32 +89,29 @@ def capture_call_stack(entity_name):
         Returns:
             True if the current call stack is to logged, False otherwise
         """
+        is_class_in_halt_tracking = len(HALT_TRACKING) is not 0 and inspect.isclass(entity_name) \
+                                    and issubclass(entity_name, tuple(HALT_TRACKING[-1]))
+        is_function_in_halt_tracking = len(HALT_TRACKING) is not 0 and not inspect.isclass(entity_name)\
+                                       and any((entity_name.__name__ == x.__name__
+                                                and entity_name.__module__ == x.__module__)
+                                               for x in tuple(HALT_TRACKING[-1]))
+
+        is_top_none = len(HALT_TRACKING) is not 0 and HALT_TRACKING[-1] is None
         is_entity_in_stack_book = temp_call_stack in STACK_BOOK[entity_name]
 
         if is_entity_in_stack_book:
             return False
-        else:
-            if HALT_TRACKING:
-                if inspect.isclass(entity_name):
-                    is_class_in_halt_tracking = issubclass(entity_name, tuple(HALT_TRACKING[-1]))
-                else:
-                    is_function_in_halt_tracking = any((entity_name.__name__ == x.__name__ and
-                                                        entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1]))
 
-                is_top_none = (HALT_TRACKING[-1] is None)
+        if is_top_none:
+                return False
 
-                if is_top_none:
-                    return False
-                # if entity is class
-                elif inspect.isclass(entity_name) and not is_class_in_halt_tracking:
-                    return True
-                # if entity is function/method
-                elif not inspect.isclass(entity_name) and not is_function_in_halt_tracking:
-                    return True
-                else:
-                    return False
+        if HALT_TRACKING:
+            if is_class_in_halt_tracking or is_function_in_halt_tracking:
+                return False
             else:
                 return True
+        else:
+            return True
 
     if _should_get_logged(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
@@ -123,7 +120,7 @@ def capture_call_stack(entity_name):
                      entity_name, final_call_stack)
         else:
             log.info("Logging new call stack number %s for %s.%s:\n %s", len(STACK_BOOK[entity_name]),
-                     entity_name.__module__, entity_name.__name__ , final_call_stack)
+                     entity_name.__module__, entity_name.__name__, final_call_stack)
 
 
 class CallStackMixin(object):
@@ -157,7 +154,7 @@ def donottrack(*entities_not_to_be_tracked):
         wrapped function
     """
     if not entities_not_to_be_tracked:
-        entities_not_to_be_tracked = [None]
+        entities_not_to_be_tracked = None
 
     @wrapt.decorator
     def real_donottrack(wrapped, instance, args, kwargs):  # pylint: disable=unused-variable
@@ -173,10 +170,17 @@ def donottrack(*entities_not_to_be_tracked):
             return of wrapped function
         """
         global HALT_TRACKING
-        if HALT_TRACKING:
-            HALT_TRACKING.append(list(set(HALT_TRACKING[-1] + list(entities_not_to_be_tracked))))
+        if entities_not_to_be_tracked is None:
+            HALT_TRACKING.append(entities_not_to_be_tracked)
         else:
-            HALT_TRACKING.append(list(entities_not_to_be_tracked))
+            if HALT_TRACKING:
+                if HALT_TRACKING[-1] is None:  # if @donottrack() calls @donottrack('xyz')
+                    pass
+                else:
+                    HALT_TRACKING.append(set(HALT_TRACKING[-1].union(entities_not_to_be_tracked)))
+            else:
+                HALT_TRACKING.append(set(entities_not_to_be_tracked))
+
         return_value = wrapped(*args, **kwargs)
         # check if the returning class is a generator
         if isinstance(return_value, types.GeneratorType):

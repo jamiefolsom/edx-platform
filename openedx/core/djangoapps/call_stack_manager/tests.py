@@ -103,7 +103,7 @@ class ClassFortrackit(object):
     """ Test class for track it """
     @trackit
     def trackit_method(self):
-        """ Instance method for tetsing track it """
+        """ Instance method for testing track it """
         return 42
 
     @trackit
@@ -123,6 +123,7 @@ def donottrack_function():
 def donottrack_yield_func():
     """ Function testing yield in donottrack """
     ModelMixinCallStckMngr(id_field=1).save()
+    donottrack_function()
     yield 48
 
 
@@ -293,6 +294,7 @@ class TestingCallStackManager(TestCase):
     def test_yield(self, log_capt):
         """ Test for yield generator """
         donottrack_yield_func()
+        self.assertEqual(core.HALT_TRACKING[-1], [None])
         self.assertEqual(len(log_capt.call_args_list), 0)
 
     def test_donottrack_function(self, log_capt):
