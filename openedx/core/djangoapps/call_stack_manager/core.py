@@ -81,7 +81,7 @@ def capture_call_stack(entity_name):
 
     final_call_stack = "".join(traceback.format_list(temp_call_stack))
 
-    def _should_get_logged(entity_name):
+    def _should_get_logged(entity_name):  # pylint: disable=
         """ Checks if current call stack of current entity should be logged or not.
 
         Arguments:
@@ -89,13 +89,13 @@ def capture_call_stack(entity_name):
         Returns:
             True if the current call stack is to logged, False otherwise
         """
-        is_class_in_halt_tracking = bool(HALT_TRACKING) and inspect.isclass(entity_name) \
-                                    and issubclass(entity_name, tuple(HALT_TRACKING[-1]))
-        is_function_in_halt_tracking = bool(HALT_TRACKING) and not inspect.isclass(entity_name) \
-                                       and any((entity_name.__name__ == x.__name__
-                                                and entity_name.__module__ == x.__module__)
-                                               for x in tuple(HALT_TRACKING[-1]))
+        is_class_in_halt_tracking = bool(HALT_TRACKING) and inspect.isclass(entity_name) and \
+                                    issubclass(entity_name, tuple(HALT_TRACKING[-1]))
 
+        is_function_in_halt_tracking = bool(HALT_TRACKING) and not inspect.isclass(entity_name) and \
+                                       any((entity_name.__name__ == x.__name__
+                                            and entity_name.__module__ == x.__module__)
+                                           for x in tuple(HALT_TRACKING[-1]))
         is_top_none = bool(HALT_TRACKING) and HALT_TRACKING[-1] is None
 
         if is_top_none:
@@ -108,7 +108,7 @@ def capture_call_stack(entity_name):
                 if temp_call_stack not in STACK_BOOK[entity_name]:
                     return True
                 else:
-                    return True
+                    return False
         else:
             if temp_call_stack not in STACK_BOOK[entity_name]:
                 return True
@@ -159,7 +159,7 @@ def donottrack(*entities_not_to_be_tracked):
         entities_not_to_be_tracked = set([None])
 
     @wrapt.decorator
-    def real_donottrack(wrapped, instance, args, kwargs):  # pylint: disable=unused-variable
+    def real_donottrack(wrapped, instance, args, kwargs):  # pylint: disable=unused-argument
         """ Takes function to be decorated and returns wrapped function
 
         Arguments:
@@ -171,7 +171,7 @@ def donottrack(*entities_not_to_be_tracked):
         Returns:
             return of wrapped function
         """
-        global HALT_TRACKING
+        global HALT_TRACKING  # pylint: disable=global-variable-not-assigned
         if entities_not_to_be_tracked is set([None]):
             HALT_TRACKING.append(set([None]))
         else:
@@ -187,6 +187,14 @@ def donottrack(*entities_not_to_be_tracked):
         # check if the returning class is a generator
         if isinstance(return_value, types.GeneratorType):
             def generator_wrapper(wrapped_generator):
+                """ Function handling wrapped yielding values.
+
+                Argument:
+                    wrapped_generator - wrapped function returning generator function
+
+                Returns:
+                    Generator Wrapper
+                """
                 try:
                     while True:
                         return_value = next(wrapped_generator)
@@ -201,7 +209,7 @@ def donottrack(*entities_not_to_be_tracked):
 
 
 @wrapt.decorator
-def trackit(wrapped, instance, args, kwargs):  # pylint: disable=unused-variable
+def trackit(wrapped, instance, args, kwargs):  # pylint: disable=unused-argument
     """ Decorator which tracks logs call stacks
 
     Arguments:
