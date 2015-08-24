@@ -89,33 +89,27 @@ def capture_call_stack(entity_name):
         Returns:
             True if the current call stack is to logged, False otherwise
         """
-        is_class_in_halt_tracking = (bool(HALT_TRACKING) and
+        is_class_in_halt_tracking = (HALT_TRACKING and
                                      inspect.isclass(entity_name) and
                                      issubclass(entity_name, tuple(HALT_TRACKING[-1])))
 
-        is_function_in_halt_tracking = (bool(HALT_TRACKING) and
+        is_function_in_halt_tracking = (HALT_TRACKING and
                                         not inspect.isclass(entity_name) and
                                         any((entity_name.__name__ == x.__name__ and
                                              entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1])))
 
-        is_top_none = bool(HALT_TRACKING) and HALT_TRACKING[-1] is None
+        is_top_none = HALT_TRACKING and HALT_TRACKING[-1] is None
 
         if is_top_none:
             return False
 
-        if HALT_TRACKING:
-            if is_class_in_halt_tracking or is_function_in_halt_tracking:
-                return False
-            else:
-                if temp_call_stack not in STACK_BOOK[entity_name]:
-                    return True
-                else:
-                    return False
+        if not temp_call_stack:
+            return False
+
+        if is_class_in_halt_tracking or is_function_in_halt_tracking and temp_call_stack in STACK_BOOK[entity_name]:
+            return False
         else:
-            if temp_call_stack not in STACK_BOOK[entity_name]:
-                return True
-            else:
-                return False
+            return True
 
     if _should_get_logged(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
@@ -158,7 +152,7 @@ def donottrack(*entities_not_to_be_tracked):
         wrapped function
     """
     if not entities_not_to_be_tracked:
-        entities_not_to_be_tracked = set([None])
+        entities_not_to_be_tracked = None
 
     @wrapt.decorator
     def real_donottrack(wrapped, instance, args, kwargs):  # pylint: disable=unused-argument
@@ -174,11 +168,11 @@ def donottrack(*entities_not_to_be_tracked):
             return of wrapped function
         """
         global HALT_TRACKING  # pylint: disable=global-variable-not-assigned
-        if entities_not_to_be_tracked is set([None]):
-            HALT_TRACKING.append(set([None]))
+        if entities_not_to_be_tracked is None:
+            HALT_TRACKING.append(None)
         else:
             if HALT_TRACKING:
-                if HALT_TRACKING[-1] is set([None]):  # if @donottrack() calls @donottrack('xyz')
+                if HALT_TRACKING[-1] is None:  # if @donottrack() calls @donottrack('xyz')
                     pass
                 else:
                     HALT_TRACKING.append(set(HALT_TRACKING[-1].union(set(entities_not_to_be_tracked))))
