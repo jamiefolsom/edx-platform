@@ -62,7 +62,7 @@ STACK_BOOK = collections.defaultdict(list)
 # Dictionary which stores call logs
 # {'EntityName' : ListOf<CallStacks>}
 # CallStacks is ListOf<Frame>
-# Frames is a tuple ('FilePath','LineNumber','Context')
+# Frame is a tuple ('FilePath','LineNumber','Function Name', 'Context')
 # {"<class 'courseware.models.StudentModule'>" : [[(file, line number, function name, context),(---,---,---)],
 #                                                 [(file, line number, function name, context),(---,---,---)]]}
 
@@ -97,10 +97,6 @@ def capture_call_stack(entity_name):
                                                for x in tuple(HALT_TRACKING[-1]))
 
         is_top_none = len(HALT_TRACKING) is not 0 and HALT_TRACKING[-1] is None
-        is_entity_in_stack_book = temp_call_stack in STACK_BOOK[entity_name]
-
-        # if is_entity_in_stack_book:
-        #     return False
 
         if is_top_none:
             return False
@@ -109,12 +105,12 @@ def capture_call_stack(entity_name):
             if is_class_in_halt_tracking or is_function_in_halt_tracking:
                 return False
             else:
-                if is_entity_in_stack_book:
+                if temp_call_stack in STACK_BOOK[entity_name]:
                     return False
                 else:
                     return True
         else:
-            if is_entity_in_stack_book:
+            if temp_call_stack in STACK_BOOK[entity_name]:
                 return False
             else:
                 return True
