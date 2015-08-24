@@ -257,15 +257,17 @@ class TestTaskExecution(ModuleStoreTestCase):
         on_course_publish(self.course.id)
         requirements = get_credit_requirements(self.course.id, namespace="reverification")
         self.assertEqual(len(requirements), 4)
-        self.assertEqual(requirements[0]["display_name"], "Midterm Start Date")
-        self.assertEqual(requirements[1]["display_name"], "Midterm Start Date")
-        self.assertEqual(requirements[2]["display_name"], "Midterm B")
-        self.assertEqual(requirements[3]["display_name"], "Midterm A")
+        # Since we are now primarily sorting on start_date and display_name if
+        # start_date is present otherwise we are just sorting on display_name.
+        self.assertEqual(requirements[0]["display_name"], "Midterm A")
+        self.assertEqual(requirements[1]["display_name"], "Midterm B")
+        self.assertEqual(requirements[2]["display_name"], "Midterm Start Date")
+        self.assertEqual(requirements[3]["display_name"], "Midterm Start Date")
 
-        # Since the first two requirements have the same display name,
+        # Since the last two requirements have the same display name,
         # we need to also check that their internal names (locations) are the same.
-        self.assertEqual(requirements[0]["name"], first_block.get_credit_requirement_name())
-        self.assertEqual(requirements[1]["name"], second_block.get_credit_requirement_name())
+        self.assertEqual(requirements[2]["name"], first_block.get_credit_requirement_name())
+        self.assertEqual(requirements[3]["name"], second_block.get_credit_requirement_name())
 
     @mock.patch(
         'openedx.core.djangoapps.credit.tasks.set_credit_requirements',
