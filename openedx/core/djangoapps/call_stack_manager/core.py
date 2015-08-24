@@ -99,19 +99,25 @@ def capture_call_stack(entity_name):
         is_top_none = len(HALT_TRACKING) is not 0 and HALT_TRACKING[-1] is None
         is_entity_in_stack_book = temp_call_stack in STACK_BOOK[entity_name]
 
-        if is_entity_in_stack_book:
-            return False
+        # if is_entity_in_stack_book:
+        #     return False
 
         if is_top_none:
-                return False
+            return False
 
         if HALT_TRACKING:
             if is_class_in_halt_tracking or is_function_in_halt_tracking:
                 return False
             else:
-                return True
+                if is_entity_in_stack_book:
+                    return False
+                else:
+                    return True
         else:
-            return True
+            if is_entity_in_stack_book:
+                return False
+            else:
+                return True
 
     if _should_get_logged(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
@@ -171,13 +177,13 @@ def donottrack(*entities_not_to_be_tracked):
         """
         global HALT_TRACKING
         if entities_not_to_be_tracked is None:
-            HALT_TRACKING.append(entities_not_to_be_tracked)
+            HALT_TRACKING.append(set(entities_not_to_be_tracked))
         else:
             if HALT_TRACKING:
                 if HALT_TRACKING[-1] is None:  # if @donottrack() calls @donottrack('xyz')
                     pass
                 else:
-                    HALT_TRACKING.append(set(HALT_TRACKING[-1].union(entities_not_to_be_tracked)))
+                    HALT_TRACKING.append(set(HALT_TRACKING[-1].union(set(entities_not_to_be_tracked))))
             else:
                 HALT_TRACKING.append(set(entities_not_to_be_tracked))
 
