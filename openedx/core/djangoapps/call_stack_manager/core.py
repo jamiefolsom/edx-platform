@@ -89,13 +89,15 @@ def capture_call_stack(entity_name):
         Returns:
             True if the current call stack is to logged, False otherwise
         """
-        is_class_in_halt_tracking = bool(HALT_TRACKING) and inspect.isclass(entity_name) and \
-                                    issubclass(entity_name, tuple(HALT_TRACKING[-1]))
+        is_class_in_halt_tracking = (bool(HALT_TRACKING) and
+                                     inspect.isclass(entity_name) and
+                                     issubclass(entity_name, tuple(HALT_TRACKING[-1])))
 
-        is_function_in_halt_tracking = bool(HALT_TRACKING) and not inspect.isclass(entity_name) and \
-                                       any((entity_name.__name__ == x.__name__
-                                            and entity_name.__module__ == x.__module__)
-                                           for x in tuple(HALT_TRACKING[-1]))
+        is_function_in_halt_tracking = (bool(HALT_TRACKING) and
+                                        not inspect.isclass(entity_name) and
+                                        any((entity_name.__name__ == x.__name__ and
+                                             entity_name.__module__ == x.__module__) for x in tuple(HALT_TRACKING[-1])))
+
         is_top_none = bool(HALT_TRACKING) and HALT_TRACKING[-1] is None
 
         if is_top_none:
