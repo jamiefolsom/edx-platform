@@ -442,7 +442,6 @@ class CohortConfigurationTest(EventsTestMixin, UniqueCourseTest, CohortTestMixin
         self.assertTrue(self.cohort_management_page.is_cohorted)
         self.assertTrue(self.cohort_management_page.cohort_management_controls_visible())
         self.cohort_management_page.is_cohorted = False
-        self.cohort_management_page.wait_for_ajax()
         self.assertFalse(self.cohort_management_page.cohort_management_controls_visible())
         self.browser.refresh()
         self.cohort_management_page.wait_for_page()
