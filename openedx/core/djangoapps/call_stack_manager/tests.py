@@ -301,6 +301,6 @@ class TestingCallStackManager(TestCase):
 
     def test_donottrack_function(self, log_capt):
         """ Test donotrack for functions """
-        x = donottrack_function()
-        self.assertEqual(x, 42)
+        temp = donottrack_function()
+        self.assertEqual(temp, 42)
         self.assertEqual(len(log_capt.call_args_list), 0)
