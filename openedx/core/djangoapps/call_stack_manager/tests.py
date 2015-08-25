@@ -117,7 +117,8 @@ class ClassFortrackit(object):
 def donottrack_function():
     """Testing function donottrack for a function"""
     for __ in range(5):
-        __ = ClassFortrackit.trackit_class_method()
+        x = ClassFortrackit.trackit_class_method()
+    return x
 
 
 @donottrack()
@@ -300,5 +301,6 @@ class TestingCallStackManager(TestCase):
 
     def test_donottrack_function(self, log_capt):
         """ Test donotrack for functions """
-        donottrack_function()
+        x = donottrack_function()
+        self.assertEqual(x, 42)
         self.assertEqual(len(log_capt.call_args_list), 0)
