@@ -117,8 +117,8 @@ class ClassFortrackit(object):
 def donottrack_function():
     """Testing function donottrack for a function"""
     for __ in range(5):
-        x = ClassFortrackit.trackit_class_method()
-    return x
+        temp_var = ClassFortrackit.trackit_class_method()
+    return temp_var
 
 
 @donottrack()
