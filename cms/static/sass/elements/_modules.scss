@@ -196,7 +196,7 @@
       }
     }
 
-  button {
+  .button-component {
       @include clearfix();
       @include transition(none);
       @extend %t-demi-strong;
