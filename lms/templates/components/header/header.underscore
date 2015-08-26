@@ -1,4 +1,4 @@
-<header class="page-header has-secondary">
+<header class="page-header <%= headerType ? 'page-header-' + headerType : '' %> has-secondary">
     <div class="page-header-main">
         <% if (breadcrumbs !== null && breadcrumbs.length > 0) { %>
             <nav class="breadcrumbs" aria-label="<%- nav_aria_label %>">
