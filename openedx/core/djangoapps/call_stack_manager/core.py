@@ -109,15 +109,9 @@ def capture_call_stack(entity_name):
             if is_class_in_halt_tracking or is_function_in_halt_tracking:
                 return False
             else:
-                if temp_call_stack not in STACK_BOOK[entity_name]:
-                    return True
-                else:
-                    return False
+                return temp_call_stack not in STACK_BOOK[entity_name]
         else:
-            if temp_call_stack not in STACK_BOOK[entity_name]:
-                return True
-            else:
-                return False
+            return temp_call_stack not in STACK_BOOK[entity_name]
 
     if _should_get_logged(entity_name):
         STACK_BOOK[entity_name].append(temp_call_stack)
