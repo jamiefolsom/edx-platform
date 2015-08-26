@@ -1,6 +1,6 @@
 ;(function (define) {
     'use strict';
-    define(['jquery', 'underscore', 'backbone', 'history', 'js/student_account/models/LoginModel',
+    define(['jquery', 'underscore', 'backbone', 'js/vendor/history', 'js/student_account/models/LoginModel',
             'js/student_account/models/PasswordResetModel', 'js/student_account/models/RegisterModel',
             'js/student_account/views/LoginView', 'js/student_account/views/PasswordResetView',
             'js/student_account/views/RegisterView', 'js/student_account/views/InstitutionLoginView',
