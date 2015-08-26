@@ -15,7 +15,7 @@ define([
 
         beforeEach(function () {
             setFixtures(
-                '<div class="teams-content"><div class="msg-content"><div class="copy"></div></div><div class="header-action-view"></div></div>'
+                '<div class="teams-content"><div class="msg-content"><div class="copy"></div></div><div class="page-header-secondary"></div></div>'
             );
         });
 

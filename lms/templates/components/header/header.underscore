@@ -1,4 +1,4 @@
-<header class="page-header <%= headerType ? 'page-header-' + headerType : '' %> has-secondary">
+<header class="page-header has-secondary">
     <div class="page-header-main">
         <% if (breadcrumbs !== null && breadcrumbs.length > 0) { %>
             <nav class="breadcrumbs" aria-label="<%- nav_aria_label %>">
@@ -11,5 +11,5 @@
         <h2 class="page-title"><%- title %></h2>
         <p class="page-description"><%- description %></p>
     </div>
-    <div class="header-action-view"></div>
+    <div class="page-header-secondary"></div>
 </header>
