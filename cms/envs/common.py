@@ -935,6 +935,24 @@ DEFAULT_COURSE_LANGUAGE = "en"
 
 ################ ADVANCED_COMPONENT_TYPES ###############
 
+# These strings are entry-point names from the setup.py of the XBlock.
+# For example:
+#
+#   setup(
+#       name='xblock-foobar',
+#       version='0.1',
+#       packages=[
+#           'foobar_xblock',
+#       ],
+#       entry_points={
+#           'xblock.v1': [
+#               'foobar-block = foobar_xblock:FoobarBlock',
+#           ]
+#       },
+#   )
+#
+# To use this block, add 'foobar-block' to the ADVANCED_COMPONENT_TYPES list.
+
 ADVANCED_COMPONENT_TYPES = [
     'annotatable',
     'textannotation',  # module for annotating text (with annotation table)
